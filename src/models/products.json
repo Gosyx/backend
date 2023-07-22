@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "code": "E001",
+    "title": "Emote",
+    "description": "Emote chibi",
+    "price": 2000,
+    "thumbnail": "emotes.jpg",
+    "stock": 10
+  },
+  {
+    "id": 2,
+    "code": "P001",
+    "title": "Paneles",
+    "description": "Paneles animados",
+    "price": 1500,
+    "thumbnail": "paneles.jpg",
+    "stock": 5
+  },
+  {
+    "id": 3,
+    "code": "I001",
+    "title": "Insignias",
+    "description": "Insignias de sub",
+    "price": 2000,
+    "thumbnail": "insignias.jpg",
+    "stock": 3
+  }
+]
