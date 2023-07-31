@@ -125,5 +125,10 @@ app.get("/cart", (req, res) => {
   res.render("cart", { pageTitle: "Carrito de Compras", cart: cartItems });
 });
 app.get("/realtimeproducts", (req, res) => {
-  res.send(realTimeProductsTemplate);
+  const dynamicData = { 
+    title: "Título dinámico",
+    content: "Contenido dinámico",
+  };
+  
+  res.render("realTimeProducts", dynamicData); 
 });
