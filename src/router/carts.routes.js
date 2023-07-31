@@ -8,7 +8,7 @@ CartRouter.post("/", async (req, res) => {
 });
 
 CartRouter.get("/", async (req, res) => {
-  res.send(await carts.getCartsById(req.params.id));
+  res.send(await carts.getCartsById(req.params.cid));
 });
 CartRouter.post("/:cid/products/:pid", async (req, res) => {
   let cartId = req.params.cid;

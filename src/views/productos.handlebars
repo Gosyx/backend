@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ pageTitle }}</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    {{> nav}} <!-- Incluye el contenido del partial nav.handlebars -->
+    <main>
+        <h1>Lista de productos</h1>
+        {{#each products}}
+            <h2>{{this.title}}</h2>
+            <p>{{this.price}}</p>
+            <p>{{this.stock}}</p>
+            <form action="/cart/add" method="post">
+  <input type="hidden" name="productId" value="{{this.id}}">
+  <label for="quantity">Cantidad:</label>
+  <input type="number" name="quantity" value="1" min="1" max="{{this.stock}}">
+  <button type="submit">Agregar al carrito</button>
+</form>
+
+        {{/each}}
+    </main>
+</body>
+</html>

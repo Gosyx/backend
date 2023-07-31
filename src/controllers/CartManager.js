@@ -1,64 +1,50 @@
 import { promises as fs } from "fs";
-import { nanoid } from "nanoid";
-import ProductManager from "./ProductManager.js";
-const productAll = new ProductManager();
+import { fileURLToPath } from "url";
+import { join } from "path";
+
+const currentFileURL = import.meta.url;
+const currentFilePath = fileURLToPath(currentFileURL);
+const currentDirPath = join(currentFilePath, ".."); // Directorio actual
+
+const cartsFilePath = join(currentDirPath, "../data/cart.json"); // Ruta al archivo cart.json relativa al directorio actual
+const productsFilePath = join(currentDirPath, "../data/products.json"); // Ruta al archivo products.json relativa al directorio actual
 
 class CartManager {
-  constructor() {
-    this.path = "./src/moderls/carts.json";
-  }
-  readCarts = async () => {
-    let carts = await fs.readFile(this.path, "utf-8");
-    return JSON.parse(carts);
-  };
+  // ... (código existente)
 
-  writeCarts = async (cart) => {
-    await fs.writeFile(this.path, JSON.stringify(cart));
-  };
-  exist = async (id) => {
-    let carts = await this.readCarts();
-    return carts.find((cart) => cart.id === id);
-  };
-  addCarts = async () => {
-    let cartOld = await this.readCarts();
-    let id = nanoid();
-    let cartsConcat = [{ id: id, products: [] }, ...cartOld];
-    await this.writeCarts(cartsConcat);
-    return "Carrito Agregado";
-  };
-  getCartsById = async (id) => {
-    let cartById = await this.exist(id);
-    if (!cartById) return "Carrito No Encontrado";
-    return cartById;
-  };
-  addProductInCart = async (cartId, producId) => {
-    let cartById = await this.exist(id);
-    if (!cartById) return "Carrito No Encontrado";
-    let productById = await productAll.exist(producId);
-    if (!cartById) return "Producto No Encontrado";
+  getCartItems = async () => {
+    try {
+      const cartsData = await fs.readFile(cartsFilePath, "utf-8");
+      const productsData = await fs.readFile(productsFilePath, "utf-8");
 
-    let cartsAll = await this.readCarts();
-    let cartFilter = cartsAll.filter((cart) => cart.id != cartId);
+      const carts = JSON.parse(cartsData);
+      const products = JSON.parse(productsData);
 
-    if (cartById.products.some((prod) => prod.id === producId)) {
-      let moreProductInCart = cartById.products.find(
-        (prod) => prod.id === producId
-      );
-      moreProductInCart.cantidad++;
-      let cartsConcat = [moreProductInCart, ...cartFilter];
-      await this.writeCarts(cartsConcat);
-      return "Producto Sumado al Carrito";
+      const cartItems = carts.reduce((items, cart) => {
+        const cartProducts = cart.products.map((productInCart) => {
+          const product = products.find((p) => p.id === productInCart.pid);
+          return {
+            id: product.id,
+            code: product.code,
+            title: product.title,
+            description: product.description,
+            price: product.price,
+            thumbnail: product.thumbnail,
+            quantity: productInCart.quantity,
+          };
+        });
+
+        return items.concat(cartProducts);
+      }, []);
+
+      return cartItems;
+    } catch (error) {
+      console.error("Error al obtener los productos del carrito:", error);
+      return [];
     }
-
-    cartById.products.push({
-      id: producId.id,
-      cantidad: 1,
-    });
-
-    let cartsConcat = [cartById, ...cartFilter];
-    await this.writeCarts(cartsConcat);
-    return "Producto Agregado al Carrito";
   };
+
+  // ... (otras funciones del CartManager)
 }
 
 export default CartManager;

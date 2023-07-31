@@ -1,59 +1,32 @@
+// ProductManager.js
+
 import { promises as fs } from "fs";
-import { nanoid } from "nanoid";
+
 class ProductManager {
   constructor() {
-    this.path = "./src/models/products.json";
+    this.path = "./src/models/products.json"; // Ruta al archivo JSON que contiene los productos
   }
 
   readProducts = async () => {
-    let products = await fs.readFile(this.path, "utf-8");
-    return JSON.parse(products);
+    try {
+      let products = await fs.readFile(this.path, "utf-8");
+      return JSON.parse(products);
+    } catch (error) {
+      // Si ocurre un error al leer el archivo, se devuelve un arreglo vacío
+      return [];
+    }
   };
 
-  writeProducts = async (product) => {
-    await fs.writeFile(this.path, JSON.stringify(product));
-  };
-
-  exist = async (id) => {
+  getProductById = async (id) => {
     let products = await this.readProducts();
-    return products.find((prod) => prod.id === id);
-  };
-  addProducts = async (product) => {
-    let productsOld = await this.readProducts();
-    product.id = nanoid(10);
-    let productAll = [...productsOld, product];
-    await this.writeProducts(productAll);
-    return "Producto Agregado";
+    return products.find((product) => product.id === id);
   };
 
   getProducts = async () => {
     return await this.readProducts();
   };
-  getProductsById = async (id) => {
-    let getProductsById = await this.exist(id);
-    if (getProductsById) return "Producto No Encontrado";
-    return getProductsById;
-  };
-  updateProducts = async (id, product) => {
-    let getProductsById = await this.exist(id);
-    if (getProductsById) return "Producto No Encontrado";
-    await this.deleteProducts(id);
-    let productsOld = await this.readProducts();
-    let products = [{ ...product, id: id }, ...productsOld];
-    await this.writeProducts(products);
-    return "Producto Actualizado";
-  };
 
-  deleteProducts = async (id) => {
-    let products = await this.readProducts();
-    let existProducts = products.some((prod) => prod.id === id);
-    if (existProducts) {
-      let filterProducts = products.filter((prod) => prod.id != id);
-      await this.writeProducts(filterProducts);
-      return "Producto Eliminado";
-    }
-    return "Producto a eliminar inexistente";
-  };
+  // Aquí puedes implementar otras funciones para gestionar los productos, como agregar un nuevo producto, editar un producto existente, etc.
 }
 
 export default ProductManager;

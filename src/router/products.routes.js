@@ -24,17 +24,11 @@ ProductRouter.put("/:id", async (req, res) => {
   res.send(await product.updateProducts(id, updateProduct));
 });
 
-ProductRouter.delete("/", async (req, res) => {
+ProductRouter.delete("/:id", async (req, res) => {
   let id = req.params.id;
   res.send(await product.deleteProducts(id));
 });
 
-ProductRouter.get("/", (req, res) => {
-  res.render("home", {
-    title: "Hanasita / Handlebars",
-    admin: true,
-    products: products,
-  });
-});
+
 
 export default ProductRouter;
