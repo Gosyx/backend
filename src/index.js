@@ -6,7 +6,10 @@ import { Server } from "socket.io";
 import ProductManager from "./controllers/ProductManager.js";
 import CartManager from "./controllers/CartManager.js";
 import bodyParser from "body-parser";
-import realTimeProductsTemplate from "./public/js/realTimeProducts.handlebars.js"; // Importar la plantilla
+import mongoose from "mongoose";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const productManager = new ProductManager();
 const cartManager = new CartManager();
@@ -15,7 +18,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 8080;
+const MONGO_URI = process.env.MONGO_URI || "mongo@localhost:27017//"
+const connection = mongoose.connect("mongodb+srv://usergosyx:123@cluster0.xnogazt.mongodb.net/ventaEmotes") 
 
 const server = app.listen(PORT, () => {
   console.log(`Server running on Express port: ${PORT}`);
@@ -132,3 +137,4 @@ app.get("/realtimeproducts", (req, res) => {
   
   res.render("realTimeProducts", dynamicData); 
 });
+
