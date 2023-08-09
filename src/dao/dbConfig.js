@@ -1,9 +1,11 @@
 import mongoose from "mongoose"
 
-const URI="mongodb+srv://usergosyx:123@cluster0.xnogazt.mongodb.net/curso"
+const URI="mongodb+srv://usergosyx:123@cluster0.xnogazt.mongodb.net/venteEmotes"
 
-await mongoose.connect(URI,{
-    serverSelectionTimeoutMS:5000,
+await mongoose.connect(URI, {
+    serverSelectionTimeoutMS: 5000,
+
+  
 })
 console.log("Base de datos conectada....")
 

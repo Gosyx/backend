@@ -1,26 +1,27 @@
 import express from "express";
-import { engine } from "express-handlebars";
+import exphbs from "express-handlebars";
+import viewRouter from "./routes/view.router.js";
+import productRouter from "./routes/products.router.js";
+import cartRouter from "./routes/carts.router.js";
 import { fileURLToPath } from "url";
 import * as path from "path";
 import { Server } from "socket.io";
-import ProductManager from "./controllers/ProductManager.js";
-import CartManager from "./controllers/CartManager.js";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import * as dotenv from "dotenv";
+import ProductManager from "./dao/mongomanagers/productManagerMongo.js"; // Asegúrate de importar el ProductManager
 
 dotenv.config();
-
-const productManager = new ProductManager();
-const cartManager = new CartManager();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
 const PORT = process.env.PORT || 8080;
-const MONGO_URI = process.env.MONGO_URI || "mongo@localhost:27017//"
-const connection = mongoose.connect("mongodb+srv://usergosyx:123@cluster0.xnogazt.mongodb.net/ventaEmotes") 
+
+// Asegúrate de importar el ProductManager
+const manager = new ProductManager();
 
 const server = app.listen(PORT, () => {
   console.log(`Server running on Express port: ${PORT}`);
@@ -28,49 +29,51 @@ const server = app.listen(PORT, () => {
 
 const io = new Server(server);
 
-app.engine(
-  "handlebars",
-  engine({ layoutsDir: path.resolve(__dirname, "views/layouts") })
-);
+const handlebars = exphbs.create();
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public")));
+
+app.engine("handlebars", handlebars.engine);
 app.set("view engine", "handlebars");
 app.set("views", path.resolve(__dirname, "views"));
 
-app.use(express.static(path.join(__dirname, "public")));
-app.get("/", (req, res) => {
-  res.render("index");
-});
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use("/", viewRouter);
+app.use("/api/products", productRouter);
+app.use("/api/carts", cartRouter);
+
 const message = [];
 
 io.on("connection", (socket) => {
   console.log(`User ${socket.id} Connection`);
 
-  //Nombre del usuario
   let userName = "";
-  // Mesaje de Coneccion
+
   socket.on("userConnection", (data) => {
     userName = data.user;
-    message.push({
+    const connectionMessage = {
       id: socket.id,
       info: "connection",
       name: data.user,
-      message: `${data.user} Connectado`,
+      message: `${data.user} Conectado`,
       date: new Date().toTimeString(),
-    });
+    };
+    message.push(connectionMessage);
     io.sockets.emit("userConnection", message);
   });
-  // Mensaje de Mesaje enviado
+
   socket.on("userMessage", (data) => {
-    message.push({
+    const userMessage = {
       id: socket.id,
       info: "message",
       name: userName,
       message: data.message,
       date: new Date().toTimeString(),
-    });
+    };
+    message.push(userMessage);
     io.sockets.emit("userMessage", message);
   });
-  //Mensage Usuario escribiendo
+
   socket.on("typing", (data) => {
     socket.broadcast.emit("typing", data);
   });
@@ -79,62 +82,22 @@ io.on("connection", (socket) => {
 // Ruta para la página de inicio (home)
 app.get("/", async (req, res) => {
   try {
-    const products = await productManager.getProducts(); // Obtener la lista de productos
-    res.render("home", { pageTitle: "Página de inicio", products }); // Pasar la lista de productos a la vista
+    const products = await manager.getProducts();
+    res.render("home", { pageTitle: "Página de inicio", products });
   } catch (error) {
     console.error("Error al obtener los productos:", error);
-    res.status(500).send("Error al obtener los productos"); // Manejo de errores en caso de que no se puedan obtener los productos
+    res.status(500).send("Error al obtener los productos");
   }
 });
 
-// Ruta para la página de chat
-app.get("/chat", (req, res) => {
-  res.render("chat", { pageTitle: "Chat por Websocket" });
-});
-
-// Ruta para la página de productos
-app.get("/productos", async (req, res) => {
-  try {
-    const products = await productManager.getProducts(); // Obtener la lista de productos
-    res.render("productos", { pageTitle: "Lista de productos", products }); // Pasar la lista de productos a la vista
-  } catch (error) {
-    console.error("Error al obtener los productos:", error);
-    res.status(500).send("Error al obtener los productos"); // Manejo de errores en caso de que no se puedan obtener los productos
-  }
-});
-
-// Ruta para la página de contacto
 app.get("/contacto", (req, res) => {
   res.render("contacto", { pageTitle: "Contacto" });
 });
 
-// Ruta para agregar un producto al carrito
-app.post("/cart/add", (req, res) => {
-  // Obtener el ID del producto a agregar desde el cuerpo de la solicitud
-  const productId = parseInt(req.body.productId);
-  const quantity = parseInt(req.body.quantity);
-
-  // Agregar el producto al carrito usando el CartManager
-  cartManager.addProductToCart(productId, quantity);
-
-  // Redireccionar al carrito de compras o mostrar un mensaje de éxito
-  res.redirect("/cart");
+app.get("/productos", (req, res) => {
+  res.render("productos", { pageTitle: "Productos" });
 });
 
-// Ruta para mostrar el carrito de compras
 app.get("/cart", (req, res) => {
-  // Obtener los productos del carrito usando el CartManager
-  const cartItems = cartManager.getCartItems();
-
-  // Renderizar la vista del carrito de compras y pasar los productos del carrito
-  res.render("cart", { pageTitle: "Carrito de Compras", cart: cartItems });
+  res.render("cart", { pageTitle: "Carrito" });
 });
-app.get("/realtimeproducts", (req, res) => {
-  const dynamicData = { 
-    title: "Título dinámico",
-    content: "Contenido dinámico",
-  };
-  
-  res.render("realTimeProducts", dynamicData); 
-});
-
