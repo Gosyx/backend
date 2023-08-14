@@ -70,21 +70,3 @@ const typing = document.querySelector(".typing");
 socket.on("typing", (data) => {
   typing.textContent = `${data.nameUser} escribiendo...`;
 });
-
-inputMessage.addEventListener("keypress", (event) => {
-
-  if (event.keyCode === 13) {
-
-    event.preventDefault();
-
-  
-    const message = inputMessage.value;
-
-    socket.emit("userMessage", {
-      message: message,
-    });
-    inputMessage.value = "";
-  }
-});
-
-

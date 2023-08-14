@@ -1,12 +1,18 @@
-import { Router } from "express";
-import ProductManager from "../dao/mongomanagers/productManagerMongo.js";
+import {Router} from "express"
+//usaremos mongo ya no fs
+// import ProductManager from "../dao/filemanagers/controllers/productManager.js"
+// const manager=new ProductManager(__dirname+'/dao/filemanagers/db/products.json')
 
-
+import ProductManager from "../dao/mongomanagers/productManagerMongo.js"
 const manager=new ProductManager()
 import { __dirname } from "../utils.js"
 
 const router =Router()
-
+//esto es con fs
+// router.get("/products",async(req,res)=>{
+//     const products= await manager.getProducts(req.query)
+//     res.json({products})
+// })
 router.get("/products",async(req,res)=>{
   const products= await manager.getProducts()
   if(products.length ===0){
@@ -33,6 +39,13 @@ router.get("/products/:pid", async (req, res) => {
      res.json({ status: "success", newproduct });
   });
 
+
+
+  // router.put("/products/:pid", async (req, res) => {
+  //   const updatedproduct = await manager.updateProduct(req.params,req.body);
+  //    res.json({ status: "success", updatedproduct });
+  // });
+ 
   router.put("/products/:pid", async (req, res) => {
     const pid=req.params.pid
     const obj=req.body
@@ -49,4 +62,4 @@ router.get("/products/:pid", async (req, res) => {
 
 
 
-export default router;
+export default router

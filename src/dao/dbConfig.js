@@ -1,12 +1,18 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
-const URI="mongodb+srv://usergosyx:123@cluster0.xnogazt.mongodb.net/venteEmotes"
+const URI = "mongodb+srv://usergosyx:123@cluster0.xnogazt.mongodb.net/";
 
-await mongoose.connect(URI, {
-    serverSelectionTimeoutMS: 5000,
+const db = mongoose.connection;
 
-  
+mongoose.connect(URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
 })
-console.log("Base de datos conectada....")
+.then(() => {
+  console.log('Conexión exitosa a MongoDB');
+})
+.catch(error => {
+  console.error('Error al conectar a MongoDB:', error);
+});
 
-
+export default db;
