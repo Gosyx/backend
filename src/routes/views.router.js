@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { __dirname } from "../utils.js";
-import ProductManager from "../dao/mongomanagers/productManagerMongo.js";
+import ProductManager from "../dao/mongomanagers/productManager.js";
 
 const pmanager = new ProductManager();
 
@@ -35,7 +35,8 @@ router.get("/contacto", (req, res) => {
 
 router.get("/productos", async (req, res) => {
   try {
-    const products = await manager.getProducts();
+    const products = await pmanager.getProducts();
+    console.log(products)
     res.render("productos", { pageTitle: "Lista de Productos", products });
   } catch (error) {
     res.render("productos", { pageTitle: "Lista de Productos", products: [] });

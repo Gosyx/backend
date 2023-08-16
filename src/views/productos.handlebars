@@ -8,6 +8,7 @@
     {{> nav}} <!-- Incluye el contenido del partial nav.handlebars -->
     <main>
         <h1>Lista de productos</h1>
+        {{products}}
         {{#each products}}
             <h2>{{title}}</h2>
             <p>{{price}}</p>

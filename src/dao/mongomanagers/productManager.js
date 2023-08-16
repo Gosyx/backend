@@ -3,10 +3,10 @@ import Product from "../models/products.model.js"; // Importa el modelo de Produ
 export default class ProductManager {
   constructor() {}
 
-  async getProducts(info) {
-    const { limit } = info;
+  async getProducts() {
+    // const { limit } = info;
     try {
-      const productlist = await Product.find({}).limit(limit);
+      const productlist = await Product.find({});
       return productlist;
     } catch (error) {
       throw new Error(error);

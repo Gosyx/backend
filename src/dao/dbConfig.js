@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv";
 
-const URI = "mongodb+srv://usergosyx:123@cluster0.xnogazt.mongodb.net/";
-
-const db = mongoose.connection;
+dotenv.config();
+const URI = process.env.MONGODB_URI
 
 mongoose.connect(URI, {
   useNewUrlParser: true,
@@ -15,4 +15,3 @@ mongoose.connect(URI, {
   console.error('Error al conectar a MongoDB:', error);
 });
 
-export default db;
