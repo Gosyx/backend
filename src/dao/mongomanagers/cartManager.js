@@ -1,90 +1,59 @@
-import mongoose from 'mongoose';
+import cartModel from "../dao/models/carts.js";
 
-const cartSchema = new mongoose.Schema({
-  id: Number,
-  products: [{
-    pid: Number,
-    quantity: Number,
-  }],
-});
+const addCart = async () => {
+  const newCart = {
+    products: [],
+  };
 
-const Cart = mongoose.model('Cart', cartSchema);
+  const cartAdded = await cartModel.create(newCart);
+  return cartAdded;
+};
 
-export default class CartManager {
-  constructor(path) {
-    this.path = path;
-  }
+const getCart = async () => {
+  const response = await cartModel.find();
+  return response;
+};
 
-  async getCarts() {
-    try {
-      if (fs.existsSync(this.path)) {
-        const cartlist = await fs.promises.readFile(this.path, 'utf-8');
-        const cartlistparse = JSON.parse(cartlist);
-        return cartlistparse;
-      } else {
-        return [];
-      }
-    } catch (error) {
-      throw new Error(error);
-    }
-  }
+const getCartById = async (id) => {
+  const response = await cartModel.findById(id);
+  return response;
+};
 
-  async getCartbyId(id) {
-    const { cid } = id;
-    const allcarts = await this.getCarts();
-    const found = allcarts.find((element) => element.id === parseInt(cid));
-    if (found) {
-      return found;
-    } else {
-      console.error('cart no encontrado');
-    }
-  }
-
-  async generateCartId() {
-    if (fs.existsSync(this.path)) {
-      const listadecarts = await this.getCarts();
-      const counter = listadecarts.length;
-      if (counter == 0) {
-        return 1;
-      } else {
-        return listadecarts[counter - 1].id + 1;
-      }
-    }
-  }
-
-  async addCart() {
-    const listadecarts = await this.getCarts();
-    const id = await this.generateCartId();
-    const cartnew = {
-      id,
-      products: [],
+const addProductToCart = async (cid, pid) => {
+  /* traigo el carrito con el ID buscado */
+  const cart = await cartModel.findById(cid);
+  /* chequeo si dentro del carrito hay un producto con el pid igual */
+  const productIndex = cart.products.findIndex(
+    (product) => product.product === pid
+  );
+  /* condicional parar determinar la accion a tomar dependiendo si existe el producto o no */
+  if (productIndex === -1) {
+    const newProduct = {
+      product: pid,
+      quantity: 1,
     };
 
-    // Crear una instancia del modelo Cart y guardarla en la base de datos
-    const newCart = new Cart(cartnew);
-    await newCart.save();
+    cart.products.push(newProduct);
+    const response = await cartModel.findByIdAndUpdate(cid, {
+      products: cart.products,
+    });
+    return response;
+  } else {
+    /* obtengo la cantidad del producto y lo incremento en 1. */
+    let newQuantity = cart.products[productIndex].quantity;
+    newQuantity++;
 
-    await fs.promises.writeFile(this.path, JSON.stringify(listadecarts, null, 2));
+    // Actualizo el campo 'quantity' del producto existente
+    cart.products[productIndex].quantity = newQuantity;
+    await cartModel.findByIdAndUpdate(cid, { products: cart.products });
+    const response = await cartModel.findById(cid);
+    return response;
   }
+};
 
-  async addProductToCart(cid, pid) {
-    const listaCarts = await this.getCarts();
+const updateCart = async (cid, cart) => {
+  const response = cartModel.findByIdAndUpdate(cid, cart);
+  return response;
+};
 
-    const cart = listaCarts.find((e) => e.id === cid);
-
-    const productoIndex = cart.products.findIndex((element) => element.pid === pid);
-
-    if (productoIndex !== -1) {
-      cart.products[productoIndex].quantity++;
-    } else {
-      cart.products.push({
-        pid,
-        quantity: 1,
-      });
-    }
-
-    await Cart.updateOne({ id: cid }, { products: cart.products });
-
-    await fs.promises.writeFile(this.path, JSON.stringify(listaCarts, null, 2));
-  }
-}
+export { addCart, getCart, getCartById, addProductToCart, updateCart };

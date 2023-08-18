@@ -1,63 +1,34 @@
-import Product from "../models/products.model.js"; // Importa el modelo de Producto
+import ProductsModel from "../dao/models/products.js";
 
-export default class ProductManager {
-  constructor() {}
+const getProducts = async () => {
+  const response = await ProductsModel.find();
+  return response;
+};
 
-  async getProducts() {
-    // const { limit } = info;
-    try {
-      const productlist = await Product.find({});
-      return productlist;
-    } catch (error) {
-      throw new Error(error);
-    }
-  }
+const getProductsById = async (id) => {
+  const response = await ProductsModel.findById(id);
+  return response;
+};
 
-  async getProductbyId(id) {
-    const { pid } = id;
-    try {
-      const found = await Product.findById(pid);
-      if (found) {
-        return found;
-      } else {
-        console.error("Producto no encontrado");
-      }
-    } catch (error) {
-      throw new Error(error);
-    }
-  }
+const addProduct = async (product) => {
+  await ProductsModel.create(product);
+  return product;
+};
 
-  async addProduct(obj) {
-    try {
-      const newProduct = new Product(obj);
-      await newProduct.save();
-    } catch (error) {
-      throw new Error(error);
-    }
-  }
+const updateProduct = async (id, product) => {
+  await ProductsModel.findByIdAndUpdate(id, product);
+  return product;
+};
 
-  async updateProduct(id, obj) {
-    const { pid } = id;
-    try {
-      const updatedProduct = await Product.findByIdAndUpdate(pid, obj, {
-        new: true,
-      });
-      if (!updatedProduct) {
-        console.error("Producto no encontrado");
-      }
-    } catch (error) {
-      throw new Error(error);
-    }
-  }
+const deleteProduct = async (id) => {
+  const response = await ProductsModel.findByIdAndDelete(id);
+  return response;
+};
 
-  async deleteProduct(pid) {
-    try {
-      const deletedProduct = await Product.findByIdAndDelete(pid);
-      if (!deletedProduct) {
-        console.error("Producto no encontrado");
-      }
-    } catch (error) {
-      throw new Error(error);
-    }
-  }
-}
+export {
+  getProducts,
+  getProductsById,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+};

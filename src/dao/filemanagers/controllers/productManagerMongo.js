@@ -1,7 +1,6 @@
-import Product from "../models/products.model.js";
+import Product from "../models/products.js";
 
 export default class ProductManager {
-
   async getProducts() {
     try {
       const productlist = await Product.find({}).lean().exec();
@@ -10,7 +9,7 @@ export default class ProductManager {
       return {
         code: 500,
         status: "Error",
-        message: error.message
+        message: error.message,
       };
     }
   }
@@ -30,14 +29,14 @@ export default class ProductManager {
       const newproduct = await Product.create(obj);
       return {
         code: 202,
-        status: 'Success',
-        message: `El producto ${newproduct.title} ha sido agregado con éxito. Su ID interno es ${newproduct._id}`
+        status: "Success",
+        message: `El producto ${newproduct.title} ha sido agregado con éxito. Su ID interno es ${newproduct._id}`,
       };
     } catch (error) {
       return {
         code: 400,
-        status: 'Error',
-        message: `${error}`
+        status: "Error",
+        message: `${error}`,
       };
     }
   }
@@ -45,40 +44,44 @@ export default class ProductManager {
   async updateProduct(id, obj) {
     try {
       const productUpdated = await Product.findByIdAndUpdate(id, obj, {
-        new: true
-      }).lean().exec();
+        new: true,
+      })
+        .lean()
+        .exec();
       return productUpdated;
     } catch (error) {
       return {
         code: 400,
-        status: 'Error',
-        message: `${error}`
+        status: "Error",
+        message: `${error}`,
       };
     }
   }
 
   async deleteProduct(pid) {
     try {
-      const productToDelete = await Product.findByIdAndDelete(pid).lean().exec();
+      const productToDelete = await Product.findByIdAndDelete(pid)
+        .lean()
+        .exec();
 
       if (productToDelete) {
         return {
           code: 202,
-          status: 'Success',
-          message: `El producto con ID ${pid} ha sido eliminado exitosamente.`
+          status: "Success",
+          message: `El producto con ID ${pid} ha sido eliminado exitosamente.`,
         };
       } else {
         return {
           code: 404,
-          status: 'Error',
-          message: `No se encontró un producto con ID ${pid}.`
+          status: "Error",
+          message: `No se encontró un producto con ID ${pid}.`,
         };
       }
     } catch (error) {
       return {
         code: 400,
-        status: 'Error',
-        message: `${error}`
+        status: "Error",
+        message: `${error}`,
       };
     }
   }
